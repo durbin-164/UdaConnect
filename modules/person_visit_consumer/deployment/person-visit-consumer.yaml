@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: person-visit-consumer
+  name: person-visit-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: person-visit-consumer
+  template:
+    metadata:
+      labels:
+        service: person-visit-consumer
+    spec:
+      containers:
+      - image: durbin164/udaconnect-person-visit-consumer:latest
+        name: person-visit-consumer
+        imagePullPolicy: Always
+      restartPolicy: Always

@@ -1,0 +1,68 @@
+{
+	"info": {
+		"_postman_id": "1dd3e2ff-351b-4ca1-822f-aaef17edc286",
+		"name": "Cloud Native",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Computers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "Create Computers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "Create Computers Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "Person_visit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"person_id\": 1,\n    \"longitude\": \"-100\",\n    \"latitude\": \"200\",\n    \"creation_time\": \"2021-09-09\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5003/api/person-visit",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5003",
+					"path": [
+						"api",
+						"person-visit"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

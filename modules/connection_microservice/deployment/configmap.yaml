@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  PERSON_SERVICE_ENDPOINT_GRPC: "person-svc-grpc-api:5005/"
+  LOCATION_SERVICE_ENDPOINT: "http://location-svc-api:5000/"
+metadata:
+  name: connection-svc-config
