@@ -208,10 +208,10 @@ To manually connect to the database, you will need software compatible with Post
 ### Services
 ![Services](docs/services_screenshot.png?raw=true "Title")
 
-###Pods
+### Pods
 
 ![pods](docs/pods_screenshot.png?raw=true "Title")
 
-##Kafka
+## Kafka
 ### Kafka Topics consumer console
 ![kafka topics](docs/person-location-visits-topics.png?raw=true "Title")
