@@ -1,0 +1,5 @@
+Since Connection and Person are now 2 separate microservices,
+Connection needs to use message passing to fetch Person data from its database.
+Person service endpoint `localhost:30017/`.
+To get person data need to create a channel with this address and then create
+a stub.

@@ -1,0 +1,12 @@
+Person database will use for only person information and Location database will use for only Person visit information.
+If Udaconnect have millions of users then separated database will help to load balancing.
+
+Only connection-api microservice will use for external application Udaconnect frontend that's why this
+microservice is REST. And person service use gRPC technology as an internal API. Though location-api microservice
+used REST but we can also make it gRPC because it is also an internal API.
+
+When Udaconnect have millions of user, user visit information will huge. To store this huge visit information needs
+robost technology. That`s why here used Kafka server. A rest API get request for storing user visit information,
+and then it will produce it for kafka server. Then a kafka consumer one by one receive this messages and store it
+through location microservice in location database.
+

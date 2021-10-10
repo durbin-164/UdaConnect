@@ -3,12 +3,24 @@
 ### Background
 Conferences and conventions are hotspots for making connections. Professionals in attendance often share the same interests and can make valuable business and personal connections with one another. At the same time, these events draw a large crowd and it's often hard to make these connections in the midst of all of these events' excitement and energy. To help attendees make connections, we are building the infrastructure for a service that can inform attendees if they have attended the same booths and presentations at an event.
 
-### Goal
-You work for a company that is building a app that uses location data from mobile devices. Your company has built a [POC](https://en.wikipedia.org/wiki/Proof_of_concept) application to ingest location data named UdaTracker. This POC was built with the core functionality of ingesting location and identifying individuals who have shared a close geographic proximity.
+### Application
+![UdaConnect](docs/udaconnect-app.png?raw=true "Title")
 
-Management loved the POC so now that there is buy-in, we want to enhance this application. You have been tasked to enhance the POC application into a [MVP](https://en.wikipedia.org/wiki/Minimum_viable_product) to handle the large volume of location data that will be ingested.
+### Application Architecture
 
-To do so, ***you will refactor this application into a microservice architecture using message passing techniques that you have learned in this course***. It’s easy to get lost in the countless optimizations and changes that can be made: your priority should be to approach the task as an architect and refactor the application into microservices. File organization, code linting -- these are important but don’t affect the core functionality and can possibly be tagged as TODO’s for now!
+![Architecture](docs/architecture_design.png?raw=true "Title")
+
+Person database will use for only person information and Location database will use for only Person visit information.
+If Udaconnect have millions of users then separated database will help to load balancing.
+
+Only connection-api microservice will use for external application Udaconnect frontend that's why this
+microservice is REST. And person service use gRPC technology as an internal API. Though location-api microservice 
+used REST but we can also make it gRPC because it is also an internal API.
+
+When Udaconnect have millions of user, user visit information will huge. To store this huge visit information needs 
+robost technology. That`s why here used Kafka server. A rest API get request for storing user visit information,
+and then it will produce it for kafka server. Then a kafka consumer one by one receive this messages and store it 
+through location microservice in location database.
 
 ### Technologies
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/) - API webserver
@@ -18,7 +30,7 @@ To do so, ***you will refactor this application into a microservice architecture
 * [Vagrant](https://www.vagrantup.com/) - Tool for managing virtual deployed environments
 * [VirtualBox](https://www.virtualbox.org/) - Hypervisor allowing you to run multiple operating systems
 * [K3s](https://k3s.io/) - Lightweight distribution of K8s to easily develop against a local cluster
-
+* [Kafka](https://kafka.apache.org/quickstart) - Queueing Message Passing
 ## Running the app
 The project has been set up such that you should be able to have the project up and running with Kubernetes.
 
@@ -75,17 +87,46 @@ Type `exit` to exit the virtual OS and you will find yourself back in your compu
 
 Afterwards, you can test that `kubectl` works by running a command like `kubectl describe services`. It should not return any errors.
 
-### Steps
-1. `kubectl apply -f deployment/db-configmap.yaml` - Set up environment variables for the pods
-2. `kubectl apply -f deployment/db-secret.yaml` - Set up secrets for the pods
-3. `kubectl apply -f deployment/postgres.yaml` - Set up a Postgres database running PostGIS
-4. `kubectl apply -f deployment/udaconnect-api.yaml` - Set up the service and deployment for the API
-5. `kubectl apply -f deployment/udaconnect-app.yaml` - Set up the service and deployment for the web app
-6. `sh scripts/run_db_command.sh <POD_NAME>` - Seed your database against the `postgres` pod. (`kubectl get pods` will give you the `POD_NAME`)
+## Steps
 
-Manually applying each of the individual `yaml` files is cumbersome but going through each step provides some context on the content of the starter project. In practice, we would have reduced the number of steps by running the command against a directory to apply of the contents: `kubectl apply -f deployment/`.
+### person_microservice_grpc
+1. `cd modules/person_microservice_grpc` - Go in person_microservice_grpc module
+2. `kubectl apply -f deployment/` - Deploy the Person gRPC service and Person Postgres Database
+3. Use the command `sh scripts/run_db_command.sh <POD_NAME>` against the person `postgres` pod.
 
-Note: The first time you run this project, you will need to seed the database with dummy data. Use the command `sh scripts/run_db_command.sh <POD_NAME>` against the `postgres` pod. (`kubectl get pods` will give you the `POD_NAME`). Subsequent runs of `kubectl apply` for making changes to deployments or services shouldn't require you to seed the database again!
+
+### location_microservice
+1. `cd modules/location_microservice` - Go in location_microservice module
+2. `kubectl apply -f deployment/` - Deploy the Location REST service and Location Postgres Database
+3. Use the command `sh scripts/run_db_command.sh <POD_NAME>` against the location `postgres` pod.
+
+### connection_microservice
+1. `cd modules/connection_microservice` - Go in connection_microservice module
+2. `kubectl apply -f deployment/` - Deploy the Connection REST service
+
+### UdaConnect Frontend
+1. `cd modules/frontend` - Go in UdaConnect frontend module
+2. `kubectl apply -f deployment/` - Deploy the UdaConnect Frontend App
+
+## Kafka
+
+### Install and Run kafka server
+#### [Install Kafka and run kafka server](https://kafka.apache.org/quickstart)
+#### Run Kafka server
+1. `bin/zookeeper-server-start.sh config/zookeeper.properties`
+2. `bin/kafka-server-start.sh config/server.properties`
+
+#### Create Kafka Topics [person_location_visits]
+1. `bin/kafka-topics.sh --create --topic person_location_visits --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092`
+   
+### Microservice for kafka
+### person_visit_microservice
+1. `cd modules/person_visit_microservice` - Go in person_visit_microservice module
+2. `kubectl apply -f deployment/` - Deploy the REST Person Visit Location Producer
+
+### person_visit_consumer
+1. `cd modules/person_visit_consumer` - Go in person_visit_consumer module
+2. `kubectl apply -f deployment/` - Deploy the Person Visit Location Consumer Python App
 
 ### Verifying it Works
 Once the project is up and running, you should be able to see 3 deployments and 3 services in Kubernetes:
@@ -93,9 +134,15 @@ Once the project is up and running, you should be able to see 3 deployments and 
 
 
 These pages should also load on your web browser:
-* `http://localhost:30001/` - OpenAPI Documentation
-* `http://localhost:30001/api/` - Base path for API
-* `http://localhost:30000/` - Frontend ReactJS Application
+* `http://localhost:30015/` - OpenAPI Documentation for Connection microservice
+* `http://localhost:30016/` - OpenAPI Documentation for Location microservice
+* `http://localhost:30015/api/` - Base path for API
+* `http://localhost:30030/` - Frontend ReactJS UdaConnect Application
+
+Other API base path
+* `localhost:30017/` - gRPC person microservice
+* `http://localhost:30018/` - REST person Visit Producer 
+* `http://localhost:30019/` - Python Person Visit Consumer
 
 #### Deployment Note
 You may notice the odd port numbers being served to `localhost`. [By default, Kubernetes services are only exposed to one another in an internal network](https://kubernetes.io/docs/concepts/services-networking/service/). This means that `udaconnect-app` and `udaconnect-api` can talk to one another. For us to connect to the cluster as an "outsider", we need to a way to expose these services to `localhost`.
@@ -104,7 +151,7 @@ Connections to the Kubernetes services have been set up through a [NodePort](htt
 
 ## Development
 ### New Services
-New services can be created inside of the `modules/` subfolder. You can choose to write something new with Flask, copy and rework the `modules/api` service into something new, or just create a very simple Python application.
+New services can be created inside of the `modules/` subfolder. You can choose to write something new with Flask, copy and rework the `modules/service-name` service into something new, or just create a very simple Python application.
 
 As a reminder, each module should have:
 1. `Dockerfile`
@@ -142,7 +189,6 @@ To manually connect to the database, you will need software compatible with Post
 * GUI users will find [pgAdmin](https://www.pgadmin.org/) to be a popular open-source solution.
 
 ## Architecture Diagrams
-Your architecture diagram should focus on the services and how they talk to one another. For our project, we want the diagram in a `.png` format. Some popular free software and tools to create architecture diagrams:
 1. [Lucidchart](https://www.lucidchart.com/pages/)
 2. [Google Docs](docs.google.com) Drawings (In a Google Doc, _Insert_ - _Drawing_ - _+ New_)
 3. [Diagrams.net](https://app.diagrams.net/)
@@ -150,3 +196,21 @@ Your architecture diagram should focus on the services and how they talk to one 
 ## Tips
 * We can access a running Docker container using `kubectl exec -it <pod_id> sh`. From there, we can `curl` an endpoint to debug network issues.
 * The starter project uses Python Flask. Flask doesn't work well with `asyncio` out-of-the-box. Consider using `multiprocessing` to create threads for asynchronous behavior in a standard Flask application.
+
+## Open API endpoint
+### Connection microservice
+![Connection](docs/connection-api.png?raw=true "Title")
+
+### Location microservice
+![Location](docs/location-api.png?raw=true "Title")
+
+## Kubernets
+### Services
+![Services](docs/services_screenshot.png?raw=true "Title")
+
+###Pods
+![pods](docs/pods_screenshot.png?raw=true "Title")
+
+##Kafka
+### Kafka Topics consumer console
+![kafka topics](docs/person-location-visits-topics.png?raw=true "Title")

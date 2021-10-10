@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: person-svc-api
+  name: person-svc-api
+spec:
+  ports:
+  - name: "5000"
+    port: 5000
+    targetPort: 5000
+    nodePort: 30001
+  selector:
+    service: uperson-svc-api
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: person-svc-api
+  name: person-svc-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: person-svc-api
+  template:
+    metadata:
+      labels:
+        service: person-svc-api
+    spec:
+      containers:
+      - image: durbin164/person-svc-api:latest
+        name: person-svc-api
+        imagePullPolicy: Always
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: db-person-map
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-person_secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: db-person-map
+              key: DB_NAME
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: db-person_map
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: db-person-map
+              key: DB_PORT
+      restartPolicy: Always
