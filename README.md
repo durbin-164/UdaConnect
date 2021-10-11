@@ -14,13 +14,15 @@ Person database will use for only person information and Location database will 
 If Udaconnect have millions of users then separated database will help to load balancing.
 
 Only connection-api microservice will use for external application Udaconnect frontend that's why this
-microservice is REST. And person service use gRPC technology as an internal API. Though location-api microservice 
+microservice is REST. And person service use gRPC technology as an internal API. Though location-api microservice
 used REST but we can also make it gRPC because it is also an internal API.
 
-When Udaconnect have millions of user, user visit information will huge. To store this huge visit information needs 
-robost technology. That`s why here used Kafka server. A rest API get request for storing user visit information,
-and then it will produce it for kafka server. Then a kafka consumer one by one receive this messages and store it 
-through location microservice in location database.
+When Udaconnect have millions of user, user visit information will huge. To store this huge visit information needs
+robost technology. That`s why here used Kafka server. A gRPC API get request for storing user visit information,
+and then it will produce it for kafka server. Then a kafka consumer one by one receive this messages and store it
+in location database.
+
+
 
 ### Technologies
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/) - API webserver
@@ -120,9 +122,9 @@ Afterwards, you can test that `kubectl` works by running a command like `kubectl
 1. `bin/kafka-topics.sh --create --topic person_location_visits --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092`
    
 ### Microservice for kafka
-### person_visit_microservice
-1. `cd modules/person_visit_microservice` - Go in person_visit_microservice module
-2. `kubectl apply -f deployment/` - Deploy the REST Person Visit Location Producer
+### person_visit_microservice_grpc
+1. `cd modules/person_visit_microservice_grpc` - Go in person_visit_microservice module
+2. `kubectl apply -f deployment/` - Deploy the gRPC Person Visit Location Producer
 
 ### person_visit_consumer
 1. `cd modules/person_visit_consumer` - Go in person_visit_consumer module
@@ -141,7 +143,7 @@ These pages should also load on your web browser:
 
 Other API base path
 * `localhost:30017/` - gRPC person microservice
-* `http://localhost:30018/` - REST person Visit Producer 
+* `http://localhost:30020/` - gRPC person Visit Producer 
 * `http://localhost:30019/` - Python Person Visit Consumer
 
 #### Deployment Note
