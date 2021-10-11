@@ -6,7 +6,7 @@ microservice is REST. And person service use gRPC technology as an internal API.
 used REST but we can also make it gRPC because it is also an internal API.
 
 When Udaconnect have millions of user, user visit information will huge. To store this huge visit information needs
-robost technology. That`s why here used Kafka server. A rest API get request for storing user visit information,
+robost technology. That`s why here used Kafka server. A gRPC API get request for storing user visit information,
 and then it will produce it for kafka server. Then a kafka consumer one by one receive this messages and store it
-through location microservice in location database.
+in location database.
 

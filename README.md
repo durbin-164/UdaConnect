@@ -120,9 +120,9 @@ Afterwards, you can test that `kubectl` works by running a command like `kubectl
 1. `bin/kafka-topics.sh --create --topic person_location_visits --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092`
    
 ### Microservice for kafka
-### person_visit_microservice
-1. `cd modules/person_visit_microservice` - Go in person_visit_microservice module
-2. `kubectl apply -f deployment/` - Deploy the REST Person Visit Location Producer
+### person_visit_microservice_grpc
+1. `cd modules/person_visit_microservice_grpc` - Go in person_visit_microservice module
+2. `kubectl apply -f deployment/` - Deploy the gRPC Person Visit Location Producer
 
 ### person_visit_consumer
 1. `cd modules/person_visit_consumer` - Go in person_visit_consumer module
@@ -141,7 +141,7 @@ These pages should also load on your web browser:
 
 Other API base path
 * `localhost:30017/` - gRPC person microservice
-* `http://localhost:30018/` - REST person Visit Producer 
+* `http://localhost:30020/` - gRPC person Visit Producer 
 * `http://localhost:30019/` - Python Person Visit Consumer
 
 #### Deployment Note
